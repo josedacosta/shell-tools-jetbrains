@@ -10,7 +10,7 @@
                   ─────── TOOLS ───────
 ```
 
-**Deep uninstall, export settings, and find traces of JetBrains IDEs on macOS**
+**Deep uninstall and find traces of JetBrains IDEs on macOS**
 
 [![Platform](https://img.shields.io/badge/platform-macOS-blue?style=for-the-badge&logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Shell](https://img.shields.io/badge/shell-bash-4EAA25?style=for-the-badge&logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
@@ -67,18 +67,17 @@ bash tools/deep-uninstall.sh --dry-run
 
 | Script | Purpose |
 |--------|---------|
-| [`export-settings.sh`](tools/export-settings.sh) | **Backup** — Exports your settings to a readable file before uninstalling |
 | [`deep-uninstall.sh`](tools/deep-uninstall.sh) | **Complete removal** — Deletes the IDE AND all its traces from the entire system |
 | [`find-traces.sh`](tools/find-traces.sh) | **Verification** — Scans your system to find any remaining IDE files |
 
 ### Recommended Workflow
 
-1. **Export your settings** with `tools/export-settings.sh` (optional but recommended)
+1. **Export your settings** using **File > Manage IDE Settings > Export Settings...** (optional)
 2. **Preview the deletion** with `tools/deep-uninstall.sh --dry-run`
 3. **Run the deep uninstall** with `tools/deep-uninstall.sh`
 4. **Verify the cleanup** with `tools/find-traces.sh`
 5. **Reinstall the IDE** fresh from JetBrains website or Toolbox
-6. **Reconfigure manually** using your exported settings file or import them
+6. **Import your settings** using **File > Manage IDE Settings > Import Settings...**
 
 ---
 
@@ -200,46 +199,6 @@ bash tools/find-traces.sh
 
 ---
 
-### 3. `export-settings.sh` - Settings Export
-
-**Purpose**: Export IDE settings in a readable format for manual replication or import.
-
-Useful for:
-- Backing up your configuration before reinstalling
-- Documenting your current settings
-- Migrating settings to another machine
-
-#### Usage
-
-```bash
-bash tools/export-settings.sh
-```
-
-#### Generated Files
-
-The script creates a timestamped folder containing:
-
-| File/Folder | Description |
-|-------------|-------------|
-| `{IDE}_SETTINGS.md` | Human-readable Markdown summary of all settings |
-| `options/` | Raw IDE options (XML configuration files) |
-| `colors/` | Custom color schemes |
-| `keymaps/` | Custom keymaps |
-| `codestyles/` | Code style settings |
-| `templates/` | Live templates |
-| `plugins_list.txt` | List of installed plugins |
-
-#### Exported Information
-
-- **Editor settings**: Font size, line spacing, soft wraps
-- **Code style**: Active scheme and custom styles
-- **Keymap**: Active keymap and custom shortcuts
-- **Appearance**: Theme, color scheme
-- **Plugins**: List of all installed plugins
-- **Recent projects**: History of opened projects
-
----
-
 ## Security and Isolation
 
 **CRITICAL**: Each script uses UNIQUE identifiers per IDE to prevent cross-contamination.
@@ -261,9 +220,8 @@ This isolation is guaranteed by:
 <summary><b>Scenario 1: Clean IntelliJ IDEA Reinstall</b></summary>
 
 ```bash
-# 1. Export current settings
-bash tools/export-settings.sh
-# Choose 1) IntelliJ IDEA
+# 1. Export current settings (optional)
+# In the IDE: File > Manage IDE Settings > Export Settings...
 
 # 2. Preview what will be deleted
 bash tools/deep-uninstall.sh --dry-run
