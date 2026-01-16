@@ -269,6 +269,18 @@ SEARCH_DIRS=(
 EXCLUDE_DIRS=(
     "$HOME/Projects"
     "$HOME/.Trash"
+    # JetBrains default project directories (user projects, not IDE traces)
+    "$HOME/IdeaProjects"
+    "$HOME/PycharmProjects"
+    "$HOME/WebstormProjects"
+    "$HOME/PhpstormProjects"
+    "$HOME/RubyMineProjects"
+    "$HOME/DataGripProjects"
+    "$HOME/GolandProjects"
+    "$HOME/RiderProjects"
+    "$HOME/CLionProjects"
+    "$HOME/AppCodeProjects"
+    "$HOME/FleetProjects"
 )
 
 # =============================================================================

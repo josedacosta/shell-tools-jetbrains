@@ -60,6 +60,21 @@ if [[ "$1" == "--dry-run" ]]; then
     DRY_RUN=true
 fi
 
+# JetBrains default project directories (user projects - NEVER deleted)
+PROJECT_DIRS=(
+    "$HOME/IdeaProjects"
+    "$HOME/PycharmProjects"
+    "$HOME/WebstormProjects"
+    "$HOME/PhpstormProjects"
+    "$HOME/RubyMineProjects"
+    "$HOME/DataGripProjects"
+    "$HOME/GolandProjects"
+    "$HOME/RiderProjects"
+    "$HOME/CLionProjects"
+    "$HOME/AppCodeProjects"
+    "$HOME/FleetProjects"
+)
+
 # Logging functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -138,6 +153,13 @@ echo -e "${CYAN}${BOLD_WHITE}╔════════════════
 echo -e "${CYAN}${BOLD_WHITE}║                    JETBRAINS IDE UNINSTALLER                             ║${NC}"
 echo -e "${CYAN}${BOLD_WHITE}╚══════════════════════════════════════════════════════════════════════════╝${NC}"
 echo ""
+echo -e "${YELLOW}┌──────────────────────────────────────────────────────────────────────────┐${NC}"
+echo -e "${YELLOW}│${NC} ${BOLD_WHITE}PREREQUISITE:${NC} Uninstall via JetBrains Toolbox first:                    ${YELLOW}│${NC}"
+echo -e "${YELLOW}│${NC}                                                                          ${YELLOW}│${NC}"
+echo -e "${YELLOW}│${NC}   ${BOLD_WHITE}IDEs:${NC}    Toolbox > Tools > Installed > ${DIM}...${NC} > Uninstall              ${YELLOW}│${NC}"
+echo -e "${YELLOW}│${NC}   ${BOLD_WHITE}Toolbox:${NC} Toolbox > Settings (gear) > Uninstall Toolbox              ${YELLOW}│${NC}"
+echo -e "${YELLOW}└──────────────────────────────────────────────────────────────────────────┘${NC}"
+echo ""
 echo -e "${BOLD_WHITE}Select an IDE to uninstall:${NC}"
 echo ""
 echo -e "  1) IntelliJ IDEA ${DIM}(Ultimate + Community)${NC}"
@@ -182,6 +204,8 @@ case "$ide_choice" in
             "IntelliJIdea*"
             "IdeaIC*"
         )
+        # Additional paths specific to IntelliJ
+        EXTRA_PATHS=("$HOME/Library/Application Support/cloud-code/intellij")
         # Cache patterns
         CACHE_PATTERNS_JETBRAINS=(
             "IntelliJIdea*"
@@ -191,7 +215,10 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.intellij*.plist"
             "$HOME/Library/Preferences/jetbrains.intellij*.plist"
+            "$HOME/Library/Preferences/jetbrains.ic.*.plist"
+            "$HOME/Library/Preferences/jetbrains.iu.*.plist"
         )
+        CRASHREPORTER_PATTERNS=("intellij_*.plist" "idea_*.plist")
         # Saved State patterns
         SAVED_STATE_PATTERNS=("com.jetbrains.intellij*.savedState")
         # Safe Storage name
@@ -208,6 +235,7 @@ case "$ide_choice" in
         APP_SUPPORT_PATTERNS=(
             "PyCharm*"
             "PyCharmCE*"
+            "Pycharm"
         )
         CACHE_PATTERNS_JETBRAINS=(
             "PyCharm*"
@@ -216,7 +244,9 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.pycharm*.plist"
             "$HOME/Library/Preferences/jetbrains.pycharm*.plist"
+            "$HOME/Library/Preferences/jetbrains.py.*.plist"
         )
+        CRASHREPORTER_PATTERNS=("pycharm_*.plist")
         SAVED_STATE_PATTERNS=("com.jetbrains.pycharm*.savedState")
         SAFE_STORAGE_NAME="PyCharm Safe Storage"
         DELETE_PHRASE="DELETE PYCHARM"
@@ -229,6 +259,7 @@ case "$ide_choice" in
         PROCESS_NAMES=("webstorm" "WebStorm")
         APP_SUPPORT_PATTERNS=(
             "WebStorm*"
+            "Webstorm"
         )
         CACHE_PATTERNS_JETBRAINS=(
             "WebStorm*"
@@ -236,7 +267,9 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.WebStorm*.plist"
             "$HOME/Library/Preferences/jetbrains.webstorm*.plist"
+            "$HOME/Library/Preferences/jetbrains.ws.*.plist"
         )
+        CRASHREPORTER_PATTERNS=("webstorm_*.plist")
         SAVED_STATE_PATTERNS=("com.jetbrains.WebStorm*.savedState")
         SAFE_STORAGE_NAME="WebStorm Safe Storage"
         DELETE_PHRASE="DELETE WEBSTORM"
@@ -249,6 +282,7 @@ case "$ide_choice" in
         PROCESS_NAMES=("phpstorm" "PhpStorm")
         APP_SUPPORT_PATTERNS=(
             "PhpStorm*"
+            "Phpstorm"
         )
         CACHE_PATTERNS_JETBRAINS=(
             "PhpStorm*"
@@ -256,7 +290,9 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.PhpStorm*.plist"
             "$HOME/Library/Preferences/jetbrains.phpstorm*.plist"
+            "$HOME/Library/Preferences/jetbrains.ps.*.plist"
         )
+        CRASHREPORTER_PATTERNS=("phpstorm_*.plist")
         SAVED_STATE_PATTERNS=("com.jetbrains.PhpStorm*.savedState")
         SAFE_STORAGE_NAME="PhpStorm Safe Storage"
         DELETE_PHRASE="DELETE PHPSTORM"
@@ -276,7 +312,9 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.rubymine*.plist"
             "$HOME/Library/Preferences/jetbrains.rubymine*.plist"
+            "$HOME/Library/Preferences/jetbrains.rm.*.plist"
         )
+        CRASHREPORTER_PATTERNS=("rubymine_*.plist")
         SAVED_STATE_PATTERNS=("com.jetbrains.rubymine*.savedState")
         SAFE_STORAGE_NAME="RubyMine Safe Storage"
         DELETE_PHRASE="DELETE RUBYMINE"
@@ -296,7 +334,9 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.datagrip*.plist"
             "$HOME/Library/Preferences/jetbrains.datagrip*.plist"
+            "$HOME/Library/Preferences/jetbrains.db.*.plist"
         )
+        CRASHREPORTER_PATTERNS=("datagrip_*.plist")
         SAVED_STATE_PATTERNS=("com.jetbrains.datagrip*.savedState")
         SAFE_STORAGE_NAME="DataGrip Safe Storage"
         DELETE_PHRASE="DELETE DATAGRIP"
@@ -316,7 +356,9 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.goland*.plist"
             "$HOME/Library/Preferences/jetbrains.goland*.plist"
+            "$HOME/Library/Preferences/jetbrains.go.*.plist"
         )
+        CRASHREPORTER_PATTERNS=("goland_*.plist")
         SAVED_STATE_PATTERNS=("com.jetbrains.goland*.savedState")
         SAFE_STORAGE_NAME="GoLand Safe Storage"
         DELETE_PHRASE="DELETE GOLAND"
@@ -336,7 +378,9 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.rider*.plist"
             "$HOME/Library/Preferences/jetbrains.rider*.plist"
+            "$HOME/Library/Preferences/jetbrains.rd.*.plist"
         )
+        CRASHREPORTER_PATTERNS=("rider_*.plist")
         SAVED_STATE_PATTERNS=("com.jetbrains.rider*.savedState")
         SAFE_STORAGE_NAME="Rider Safe Storage"
         DELETE_PHRASE="DELETE RIDER"
@@ -356,7 +400,9 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.CLion*.plist"
             "$HOME/Library/Preferences/jetbrains.clion*.plist"
+            "$HOME/Library/Preferences/jetbrains.cl.*.plist"
         )
+        CRASHREPORTER_PATTERNS=("clion_*.plist")
         SAVED_STATE_PATTERNS=("com.jetbrains.CLion*.savedState")
         SAFE_STORAGE_NAME="CLion Safe Storage"
         DELETE_PHRASE="DELETE CLION"
@@ -376,7 +422,9 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.AppCode*.plist"
             "$HOME/Library/Preferences/jetbrains.appcode*.plist"
+            "$HOME/Library/Preferences/jetbrains.ac.*.plist"
         )
+        CRASHREPORTER_PATTERNS=("appcode_*.plist")
         SAVED_STATE_PATTERNS=("com.jetbrains.AppCode*.savedState")
         SAFE_STORAGE_NAME="AppCode Safe Storage"
         DELETE_PHRASE="DELETE APPCODE"
@@ -396,8 +444,10 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.fleet*.plist"
             "$HOME/Library/Preferences/jetbrains.fleet*.plist"
+            "$HOME/Library/Preferences/Fleet.app.plist"
         )
-        SAVED_STATE_PATTERNS=("com.jetbrains.fleet*.savedState")
+        CRASHREPORTER_PATTERNS=("fleet_*.plist")
+        SAVED_STATE_PATTERNS=("com.jetbrains.fleet*.savedState" "Fleet.app.savedState")
         SAFE_STORAGE_NAME="Fleet Safe Storage"
         DELETE_PHRASE="DELETE FLEET"
         ;;
@@ -416,7 +466,9 @@ case "$ide_choice" in
         PREF_PATTERNS=(
             "$HOME/Library/Preferences/com.jetbrains.toolbox*.plist"
             "$HOME/Library/Preferences/jetbrains.toolbox*.plist"
+            "$HOME/Library/Preferences/jetbrains.jetprofile.asset.plist"
         )
+        CRASHREPORTER_PATTERNS=("toolbox_*.plist")
         SAVED_STATE_PATTERNS=("com.jetbrains.toolbox*.savedState")
         SAFE_STORAGE_NAME="JetBrains Toolbox Safe Storage"
         DELETE_PHRASE="DELETE TOOLBOX"
@@ -974,7 +1026,7 @@ echo -e "${BOLD_RED}╚═══════════════════
 echo ""
 
 STEP=1
-TOTAL_STEPS=10
+TOTAL_STEPS=12
 
 # ==============================================================================
 echo ""
@@ -1010,6 +1062,13 @@ for pattern in "${APP_SUPPORT_PATTERNS[@]}"; do
     fi
 done
 
+# Clean extra paths specific to this IDE
+if [[ -n "${EXTRA_PATHS+x}" ]]; then
+    for path in "${EXTRA_PATHS[@]}"; do
+        remove_item "$path" "$(basename "$path")"
+    done
+fi
+
 # ==============================================================================
 echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
@@ -1034,6 +1093,11 @@ done
 # Also check for bundle ID caches
 for bundle_id in "${BUNDLE_IDS[@]}"; do
     remove_item "$HOME/Library/Caches/$bundle_id" "$bundle_id cache"
+done
+
+# Clean nsurlsessiond Downloads cache
+for bundle_id in "${BUNDLE_IDS[@]}"; do
+    remove_item "$HOME/Library/Caches/com.apple.nsurlsessiond/Downloads/$bundle_id" "nsurlsessiond Downloads"
 done
 
 # ==============================================================================
@@ -1067,6 +1131,19 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 for pattern in "${PREF_PATTERNS[@]}"; do
     remove_pattern "$pattern" "preferences"
 done
+
+# ==============================================================================
+echo ""
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}[$STEP/$TOTAL_STEPS] CRASH REPORTER${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+((STEP++))
+
+if [[ -n "${CRASHREPORTER_PATTERNS+x}" ]]; then
+    for pattern in "${CRASHREPORTER_PATTERNS[@]}"; do
+        remove_pattern "$HOME/Library/Application Support/CrashReporter/$pattern" "CrashReporter"
+    done
+fi
 
 # ==============================================================================
 echo ""
@@ -1125,6 +1202,88 @@ log_success "Temporary files cleaned"
 # ==============================================================================
 echo ""
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${BLUE}[$STEP/$TOTAL_STEPS] JETBRAINS-INSTALLED JDKs${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+((STEP++))
+
+# Only clean JetBrains-installed JDKs for IntelliJ or ALL
+if [[ "$ide_choice" == "1" ]] || [[ "$DELETE_ALL" == true ]]; then
+    log_info "Searching for JetBrains-installed JDKs..."
+    find "$HOME/Library/Java/JavaVirtualMachines" -maxdepth 1 -name "*.intellij" -type d 2>/dev/null | while read -r item; do
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
+        else
+            rm -rf "$item" 2>/dev/null && log_success "Removed JDK: $(basename "$item")"
+        fi
+    done
+else
+    log_info "Skipping JetBrains-installed JDKs (only for IntelliJ)"
+fi
+
+# Clean additional JetBrains products (only when doing ALL)
+if [[ "$DELETE_ALL" == true ]]; then
+    log_info "Cleaning additional JetBrains products..."
+
+    # Additional Application Support folders
+    remove_item "$HOME/Library/Application Support/JetBrains Space" "JetBrains Space"
+    remove_item "$HOME/Library/Application Support/cloud-code/intellij" "Cloud Code IntelliJ"
+
+    # Aqua IDE folders (Application Support, Caches, Logs)
+    find "$HOME/Library/Application Support/JetBrains" -maxdepth 1 -name "Aqua*" -type d 2>/dev/null | while read -r item; do
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
+        else
+            rm -rf "$item" 2>/dev/null && log_success "Removed: $(basename "$item")"
+        fi
+    done
+    find "$HOME/Library/Caches/JetBrains" -maxdepth 1 -name "Aqua*" -type d 2>/dev/null | while read -r item; do
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
+        else
+            rm -rf "$item" 2>/dev/null && log_success "Removed: $(basename "$item")"
+        fi
+    done
+    find "$HOME/Library/Logs/JetBrains" -maxdepth 1 -name "Aqua*" -type d 2>/dev/null | while read -r item; do
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
+        else
+            rm -rf "$item" 2>/dev/null && log_success "Removed: $(basename "$item")"
+        fi
+    done
+
+    # Additional products plists
+    ADDITIONAL_PLISTS=(
+        "com.jetbrains.gateway.plist"
+        "com.jetbrains.dataspell.plist"
+        "com.jetbrains.aqua.plist"
+        "com.jetbrains.aqua-EAP.plist"
+        "com.jetbrains.cwm.guest.plist"
+        "com.jetbrains.writerside-EAP.plist"
+        "com.jetbrains.cefserver.helper.renderer.plist"
+        "com.jetbrains.jbr.java.plist"
+        "jetbrains.ai.csat.plist"
+    )
+    for plist in "${ADDITIONAL_PLISTS[@]}"; do
+        remove_item "$HOME/Library/Preferences/$plist" "$plist"
+    done
+    # Additional products saved states
+    ADDITIONAL_STATES=(
+        "com.jetbrains.gateway.savedState"
+        "com.jetbrains.dataspell.savedState"
+        "com.jetbrains.aqua.savedState"
+        "com.jetbrains.aqua-EAP.savedState"
+        "com.jetbrains.cwm.guest.savedState"
+        "com.jetbrains.writerside-EAP.savedState"
+        "com.jetbrains.jbr.java.savedState"
+    )
+    for state in "${ADDITIONAL_STATES[@]}"; do
+        remove_item "$HOME/Library/Saved Application State/$state" "$state"
+    done
+fi
+
+# ==============================================================================
+echo ""
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${BLUE}[$STEP/$TOTAL_STEPS] SYSTEM CACHE CLEANUP${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 ((STEP++))
@@ -1172,6 +1331,27 @@ for folder in "$HOME/Library/Application Support/JetBrains" "$HOME/Library/Cache
         remove_item "$folder" "Empty JetBrains folder"
     fi
 done
+
+# =============================================================================
+# PROJECT FOLDERS (Preserved)
+# =============================================================================
+echo ""
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}PROJECT FOLDERS (Preserved - NOT deleted)${NC}"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+PROJECT_FOUND=false
+for project_dir in "${PROJECT_DIRS[@]}"; do
+    if [[ -d "$project_dir" ]]; then
+        echo -e "  ${GREEN}✓${NC} $(basename "$project_dir")/ ${DIM}(your projects are safe)${NC}"
+        PROJECT_FOUND=true
+    fi
+done
+if [[ "$PROJECT_FOUND" == false ]]; then
+    echo -e "  ${DIM}No JetBrains project folders found${NC}"
+fi
+echo ""
+echo -e "${DIM}To delete project folders manually: rm -rf ~/IdeaProjects (etc.)${NC}"
 
 # =============================================================================
 # KEYCHAIN (Manual step)

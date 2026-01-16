@@ -20,9 +20,8 @@ Any alternative solutions you've considered.
 
 ## Affected Script(s)
 
-- [ ] deep_uninstall.sh
-- [ ] export_settings.sh
-- [ ] find_traces.sh
+- [ ] deep-uninstall.sh
+- [ ] find-traces.sh
 - [ ] New script
 
 ## Additional Context
