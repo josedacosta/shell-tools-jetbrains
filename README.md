@@ -54,8 +54,8 @@ This repository provides Bash scripts for **complete, deep cleaning** of JetBrai
 
 ```bash
 # Clone the repository
-git clone https://github.com/josedacosta/jetbrains-tools.git
-cd jetbrains-tools
+git clone https://github.com/josedacosta/shell-tools-jetbrains.git
+cd shell-tools-jetbrains
 
 # Run a script
 bash tools/deep-uninstall.sh --dry-run
