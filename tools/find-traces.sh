@@ -281,6 +281,45 @@ EXCLUDE_DIRS=(
     "$HOME/CLionProjects"
     "$HOME/AppCodeProjects"
     "$HOME/FleetProjects"
+    # False positives (third-party apps containing JetBrains references)
+    "$HOME/.bun"
+    "$HOME/.npm"
+    "$HOME/.yarn"
+    "$HOME/.m2"
+    "$HOME/.ivy2"
+    "$HOME/.cache/github-copilot"
+    "$HOME/.config/github-copilot"
+    "$HOME/.claude"
+    "$HOME/.cursor"
+    "$HOME/.vscode"
+    "$HOME/.antigravity"
+    "$HOME/.nvm"
+    "/private/tmp/claude"
+    "$HOME/Library/Logs/Claude"
+    "$HOME/Library/Caches/Yarn"
+    "$HOME/Library/Caches/Coursier"
+    "$HOME/Library/Caches/pypoetry"
+    "$HOME/Library/Caches/claude-cli-nodejs"
+    "$HOME/Library/Caches/Google"
+    "$HOME/Library/Android"
+    "$HOME/Library/Application Support/Google"
+    "$HOME/Library/Application Support/Google/Chrome"
+    "$HOME/Library/Application Support/Logi"
+    "$HOME/Library/Application Support/JDownloader 2"
+    "$HOME/Library/Group Containers"
+    "$HOME/Library/Containers"
+    "$HOME/Library/Mobile Documents"
+    "/Applications"
+    "/Library/Frameworks/Python.framework"
+    "/Library/Apple"
+    "/System/Library"
+    "/opt/homebrew"
+    "/usr/local/aws-cli"
+    # User downloads (may contain installers - not traces)
+    "$HOME/Downloads"
+    "$HOME/Téléchargements"
+    "$HOME/Desktop"
+    "$HOME/Bureau"
 )
 
 # =============================================================================
@@ -322,9 +361,10 @@ echo ""
 # BUILD EXCLUDE ARGUMENTS FOR FIND COMMAND
 # =============================================================================
 EXCLUDE_ARGS=""
+# Exclude /System/Volumes/Data entirely to avoid duplicates
+EXCLUDE_ARGS="$EXCLUDE_ARGS -path \"/System/Volumes/Data\" -prune -o"
 for dir in "${EXCLUDE_DIRS[@]}"; do
     EXCLUDE_ARGS="$EXCLUDE_ARGS -path \"$dir\" -prune -o"
-    EXCLUDE_ARGS="$EXCLUDE_ARGS -path \"/System/Volumes/Data$dir\" -prune -o"
 done
 
 # Build pattern arguments
