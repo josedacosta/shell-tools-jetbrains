@@ -613,6 +613,19 @@ echo ""
 sleep 1
 
 # =============================================================================
+# REQUEST SUDO ACCESS (for system files like DiagnosticReports)
+# =============================================================================
+if [[ "$DRY_RUN" == false ]] && [[ "$DELETE_ALL" == true ]]; then
+    echo -e "${YELLOW}Some system files require administrator access.${NC}"
+    echo -e "${YELLOW}Please enter your password if prompted:${NC}"
+    echo ""
+    sudo -v
+    # Keep sudo alive in background
+    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+    SUDO_KEEPER_PID=$!
+fi
+
+# =============================================================================
 # FUNCTION TO CONFIGURE IDE VARIABLES
 # =============================================================================
 configure_ide_vars() {
@@ -1197,7 +1210,41 @@ for bundle_id in "${BUNDLE_IDS[@]}"; do
     done
 done
 
+# Additional temp patterns for ALL JetBrains products
+if [[ "$DELETE_ALL" == true ]]; then
+    log_info "Cleaning all JetBrains temporary files..."
+    # All possible JetBrains temp patterns
+    TEMP_PATTERNS=(
+        "com.jetbrains.*"
+        "org.jetbrains.*"
+        "Fleet.app"
+        "intellij-*"
+        "jetbrains*"
+    )
+    for pattern in "${TEMP_PATTERNS[@]}"; do
+        find /private/var/folders -name "$pattern" 2>/dev/null | while read -r item; do
+            if [[ "$DRY_RUN" == true ]]; then
+                echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
+            else
+                rm -rf "$item" 2>/dev/null && log_success "Removed temp: $(basename "$item")"
+            fi
+        done
+    done
+fi
+
 log_success "Temporary files cleaned"
+
+# Clean Java error heap dumps
+log_info "Cleaning Java error heap dumps..."
+for hprof in "$HOME"/java_error_in_*.hprof; do
+    if [[ -e "$hprof" ]]; then
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $hprof"
+        else
+            rm -f "$hprof" 2>/dev/null && log_success "Removed: $(basename "$hprof")"
+        fi
+    fi
+done
 
 # ==============================================================================
 echo ""
@@ -1209,11 +1256,20 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 # Only clean JetBrains-installed JDKs for IntelliJ or ALL
 if [[ "$ide_choice" == "1" ]] || [[ "$DELETE_ALL" == true ]]; then
     log_info "Searching for JetBrains-installed JDKs..."
+    # Regular JDKs
     find "$HOME/Library/Java/JavaVirtualMachines" -maxdepth 1 -name "*.intellij" -type d 2>/dev/null | while read -r item; do
         if [[ "$DRY_RUN" == true ]]; then
             echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
         else
             rm -rf "$item" 2>/dev/null && log_success "Removed JDK: $(basename "$item")"
+        fi
+    done
+    # Hidden JDKs (start with a dot)
+    find "$HOME/Library/Java/JavaVirtualMachines" -maxdepth 1 -name ".*.intellij" -type d 2>/dev/null | while read -r item; do
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
+        else
+            rm -rf "$item" 2>/dev/null && log_success "Removed hidden JDK: $(basename "$item")"
         fi
     done
 else
@@ -1224,34 +1280,18 @@ fi
 if [[ "$DELETE_ALL" == true ]]; then
     log_info "Cleaning additional JetBrains products..."
 
+    # DELETE ENTIRE JetBrains folders (nuclear option for ALL)
+    log_info "Removing ALL JetBrains folders..."
+    remove_item "$HOME/Library/Application Support/JetBrains" "JetBrains Application Support"
+    remove_item "$HOME/Library/Caches/JetBrains" "JetBrains Caches"
+    remove_item "$HOME/Library/Logs/JetBrains" "JetBrains Logs"
+
     # Additional Application Support folders
     remove_item "$HOME/Library/Application Support/JetBrains Space" "JetBrains Space"
     remove_item "$HOME/Library/Application Support/cloud-code/intellij" "Cloud Code IntelliJ"
+    remove_item "$HOME/Library/Application Support/cloud-code" "Cloud Code (if empty)"
 
-    # Aqua IDE folders (Application Support, Caches, Logs)
-    find "$HOME/Library/Application Support/JetBrains" -maxdepth 1 -name "Aqua*" -type d 2>/dev/null | while read -r item; do
-        if [[ "$DRY_RUN" == true ]]; then
-            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
-        else
-            rm -rf "$item" 2>/dev/null && log_success "Removed: $(basename "$item")"
-        fi
-    done
-    find "$HOME/Library/Caches/JetBrains" -maxdepth 1 -name "Aqua*" -type d 2>/dev/null | while read -r item; do
-        if [[ "$DRY_RUN" == true ]]; then
-            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
-        else
-            rm -rf "$item" 2>/dev/null && log_success "Removed: $(basename "$item")"
-        fi
-    done
-    find "$HOME/Library/Logs/JetBrains" -maxdepth 1 -name "Aqua*" -type d 2>/dev/null | while read -r item; do
-        if [[ "$DRY_RUN" == true ]]; then
-            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
-        else
-            rm -rf "$item" 2>/dev/null && log_success "Removed: $(basename "$item")"
-        fi
-    done
-
-    # Additional products plists
+    # Additional products plists (specific files)
     ADDITIONAL_PLISTS=(
         "com.jetbrains.gateway.plist"
         "com.jetbrains.dataspell.plist"
@@ -1262,10 +1302,29 @@ if [[ "$DELETE_ALL" == true ]]; then
         "com.jetbrains.cefserver.helper.renderer.plist"
         "com.jetbrains.jbr.java.plist"
         "jetbrains.ai.csat.plist"
+        "Fleet.app.plist"
     )
     for plist in "${ADDITIONAL_PLISTS[@]}"; do
         remove_item "$HOME/Library/Preferences/$plist" "$plist"
     done
+
+    # Clean ALL jetbrains.* plists (covers version-specific like jetbrains.go.252.plist)
+    log_info "Cleaning all JetBrains preference files..."
+    find "$HOME/Library/Preferences" -maxdepth 1 -name "jetbrains.*.plist" 2>/dev/null | while read -r item; do
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
+        else
+            rm -f "$item" 2>/dev/null && log_success "Removed: $(basename "$item")"
+        fi
+    done
+    find "$HOME/Library/Preferences" -maxdepth 1 -name "com.jetbrains.*.plist" 2>/dev/null | while read -r item; do
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
+        else
+            rm -f "$item" 2>/dev/null && log_success "Removed: $(basename "$item")"
+        fi
+    done
+
     # Additional products saved states
     ADDITIONAL_STATES=(
         "com.jetbrains.gateway.savedState"
@@ -1275,9 +1334,53 @@ if [[ "$DELETE_ALL" == true ]]; then
         "com.jetbrains.cwm.guest.savedState"
         "com.jetbrains.writerside-EAP.savedState"
         "com.jetbrains.jbr.java.savedState"
+        "Fleet.app.savedState"
     )
     for state in "${ADDITIONAL_STATES[@]}"; do
         remove_item "$HOME/Library/Saved Application State/$state" "$state"
+    done
+
+    # Clean ALL com.jetbrains.* saved states
+    find "$HOME/Library/Saved Application State" -maxdepth 1 -name "com.jetbrains.*.savedState" -type d 2>/dev/null | while read -r item; do
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $item"
+        else
+            rm -rf "$item" 2>/dev/null && log_success "Removed: $(basename "$item")"
+        fi
+    done
+
+    # Clean remaining JetBrains folders if empty
+    log_info "Cleaning empty JetBrains folders..."
+    rmdir "$HOME/Library/Application Support/JetBrains" 2>/dev/null && log_success "Removed empty JetBrains folder"
+    rmdir "$HOME/Library/Caches/JetBrains" 2>/dev/null && log_success "Removed empty JetBrains cache folder"
+    rmdir "$HOME/Library/Logs/JetBrains" 2>/dev/null && log_success "Removed empty JetBrains logs folder"
+
+    # Clean system DiagnosticReports (requires sudo for /Library)
+    log_info "Cleaning system diagnostic reports..."
+    DIAG_PREFIXES=(
+        "jetbrains"
+        "goland"
+        "webstorm"
+        "pycharm"
+        "intellij"
+        "phpstorm"
+        "rubymine"
+        "datagrip"
+        "rider"
+        "clion"
+        "appcode"
+        "fleet"
+    )
+    for prefix in "${DIAG_PREFIXES[@]}"; do
+        for diag in /Library/Logs/DiagnosticReports/${prefix}*.diag /Library/Logs/DiagnosticReports/${prefix}*.cpu_resource.diag; do
+            if [[ -e "$diag" ]]; then
+                if [[ "$DRY_RUN" == true ]]; then
+                    echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove (sudo): $diag"
+                else
+                    sudo rm -f "$diag" 2>/dev/null && log_success "Removed: $(basename "$diag")"
+                fi
+            fi
+        done
     done
 fi
 
@@ -1375,6 +1478,64 @@ echo "  3. Delete the found entries"
 echo ""
 
 # =============================================================================
+# FINAL CLEANUP (runs for ALL options)
+# =============================================================================
+echo ""
+echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${MAGENTA}FINAL CLEANUP - Removing any remaining JetBrains traces${NC}"
+echo -e "${MAGENTA}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+# Clean ALL remaining jetbrains.*.plist files
+log_info "Cleaning remaining JetBrains preference files..."
+for plist in "$HOME/Library/Preferences"/jetbrains.*.plist; do
+    if [[ -e "$plist" ]]; then
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $plist"
+        else
+            rm -f "$plist" 2>/dev/null && log_success "Removed: $(basename "$plist")"
+        fi
+    fi
+done
+
+# Clean ALL remaining com.jetbrains.*.plist files
+for plist in "$HOME/Library/Preferences"/com.jetbrains.*.plist; do
+    if [[ -e "$plist" ]]; then
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $plist"
+        else
+            rm -f "$plist" 2>/dev/null && log_success "Removed: $(basename "$plist")"
+        fi
+    fi
+done
+
+# Clean ALL remaining com.jetbrains.* saved states
+for state in "$HOME/Library/Saved Application State"/com.jetbrains.*.savedState; do
+    if [[ -d "$state" ]]; then
+        if [[ "$DRY_RUN" == true ]]; then
+            echo -e "  ${YELLOW}[DRY-RUN]${NC} Would remove: $state"
+        else
+            rm -rf "$state" 2>/dev/null && log_success "Removed: $(basename "$state")"
+        fi
+    fi
+done
+
+# Remove entire JetBrains folders if empty OR if DELETE_ALL
+if [[ "$DELETE_ALL" == true ]]; then
+    log_info "Removing entire JetBrains folders..."
+    rm -rf "$HOME/Library/Application Support/JetBrains" 2>/dev/null && log_success "Removed: JetBrains Application Support"
+    rm -rf "$HOME/Library/Caches/JetBrains" 2>/dev/null && log_success "Removed: JetBrains Caches"
+    rm -rf "$HOME/Library/Logs/JetBrains" 2>/dev/null && log_success "Removed: JetBrains Logs"
+else
+    # Just clean empty folders
+    rmdir "$HOME/Library/Application Support/JetBrains" 2>/dev/null && log_success "Removed empty: JetBrains folder"
+    rmdir "$HOME/Library/Caches/JetBrains" 2>/dev/null && log_success "Removed empty: JetBrains Caches"
+    rmdir "$HOME/Library/Logs/JetBrains" 2>/dev/null && log_success "Removed empty: JetBrains Logs"
+fi
+
+log_ok "Final cleanup complete"
+
+# =============================================================================
 # FINAL SUCCESS MESSAGE
 # =============================================================================
 echo ""
@@ -1406,6 +1567,11 @@ else
     echo -e "  ${WHITE}•${NC} Restart your Mac to finalize cleanup"
     echo -e "  ${WHITE}•${NC} Empty Trash if files were moved there"
     echo -e "  ${WHITE}•${NC} Manually check Keychain Access (see above)"
+fi
+
+# Kill sudo keeper process if it was started
+if [[ -n "$SUDO_KEEPER_PID" ]]; then
+    kill "$SUDO_KEEPER_PID" 2>/dev/null
 fi
 
 echo ""
