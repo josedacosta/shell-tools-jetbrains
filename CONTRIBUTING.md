@@ -48,7 +48,7 @@ bash tools/deep-uninstall.sh --dry-run
 
 ### IDE Isolation
 
-**Critical**: Never use generic patterns like `*jetbrains*` alone. Each IDE must use its specific identifiers to prevent cross-contamination. See CLAUDE.md for the complete pattern list.
+**Critical**: Never use generic patterns like `*jetbrains*` alone. Each IDE must use its specific identifiers to prevent cross-contamination. See AGENTS.md for the complete pattern list.
 
 ### Commit Messages
 

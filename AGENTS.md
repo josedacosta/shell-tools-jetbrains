@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -100,7 +100,7 @@ All scripts present an interactive menu to select which IDE (1-12) or all IDEs (
 **GitHub files (root and `.github/`):**
 - Use the most popular case convention for public open-source repositories:
   - `README.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `LICENSE` (UPPERCASE)
-  - `CLAUDE.md` (UPPERCASE)
+  - `AGENTS.md` (UPPERCASE)
   - `.github/CODEOWNERS`, `.github/PULL_REQUEST_TEMPLATE.md` (UPPERCASE)
   - `.github/ISSUE_TEMPLATE/bug_report.md`, `feature_request.md` (snake_case)
   - `.github/ISSUE_TEMPLATE/config.yml` (lowercase)
